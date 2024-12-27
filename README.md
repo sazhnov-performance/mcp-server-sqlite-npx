@@ -26,3 +26,27 @@ npx @modelcontextprotocol/inspector dist/index.js
 
 Enter absolute path to database in `Arguments` in MCP Inspector.
 `Connect` and go to `Tools` to start using the server.
+
+## Testing with Claude Desktop
+
+Add the following to `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "sqlite": {
+      "command": "/absolute/path/to/node",
+      "args": [
+        "/absolute/path/to/index.js",
+        "/absolute/path/to/database.db"
+      ]
+    }
+  }
+}
+```
+
+Examples:
+
+- `/absolute/path/to/node`: `/Users/johnny/.nvm/versions/node/v20.18.1/bin/node`
+- `/absolute/path/to/index.js`: `/Users/johnny/projects/mcp-server-sqlite-npx/dist/index.js`
+- `/absolute/path/to/database.db`: `/Users/johnny/projects/database.db`
