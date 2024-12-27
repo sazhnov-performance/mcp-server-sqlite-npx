@@ -51,6 +51,12 @@ Examples:
 - `/absolute/path/to/index.js`: `/Users/johnny/projects/mcp-server-sqlite-npx/dist/index.js`
 - `/absolute/path/to/database.db`: `/Users/johnny/projects/database.db`
 
+## Publish
+
+- Bump version in package.json
+- `npm install`
+- Commit with message: `Release {version, e.g. 0.1.6}`
+
 ## Use Released Version
 
 ```json
