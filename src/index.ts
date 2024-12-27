@@ -5,7 +5,7 @@ import {
   ListToolsRequestSchema,
   ToolSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import { Database } from 'sqlite3';
+import sqlite3 from 'sqlite3';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import path from 'path';
@@ -44,33 +44,60 @@ const AppendInsightArgsSchema = z.object({
     .describe('Business insight discovered from data analysis'),
 });
 
+interface RunResult {
+  affectedRows: number;
+}
+
+/**
+ * Wrapper for sqlite3.Database that bridges CommonJS and ESM modules.
+ * This abstraction is necessary because:
+ * 1. sqlite3 is a CommonJS module while we're using ESM (type: "module")
+ * 2. The module interop requires careful handling of the Database import
+ * 3. We need to promisify the callback-based API to work better with async/await
+ */
+class DatabaseWrapper {
+  private readonly db: sqlite3.Database;
+
+  constructor(filename: string) {
+    this.db = new sqlite3.Database(filename);
+  }
+
+  query(sql: string, params: any[] = []): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      this.db.all(sql, params, (err: Error | null, rows: any[]) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  }
+
+  execute(sql: string, params: any[] = []): Promise<RunResult[]> {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        sql,
+        params,
+        function (this: sqlite3.RunResult, err: Error | null) {
+          if (err) reject(err);
+          else resolve([{ affectedRows: this.changes }]);
+        },
+      );
+    });
+  }
+}
+
 class SqliteDatabase {
-  private readonly db: Database;
+  private readonly db: DatabaseWrapper;
   private readonly insights: string[] = [];
 
   constructor(dbPath: string) {
-    this.db = new Database(dbPath);
+    this.db = new DatabaseWrapper(dbPath);
   }
 
   private async query<T>(
     sql: string,
     params: any[] = [],
   ): Promise<T[]> {
-    return new Promise((resolve, reject) => {
-      const isSelect = sql.trim().toUpperCase().startsWith('SELECT');
-
-      if (isSelect) {
-        this.db.all(sql, params, (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows as T[]);
-        });
-      } else {
-        this.db.run(sql, params, function (err) {
-          if (err) reject(err);
-          else resolve([{ affectedRows: this.changes } as any]);
-        });
-      }
-    });
+    return this.db.query(sql, params);
   }
 
   synthesizeMemo(): string {
