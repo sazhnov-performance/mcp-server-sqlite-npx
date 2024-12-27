@@ -50,3 +50,20 @@ Examples:
 - `/absolute/path/to/node`: `/Users/johnny/.nvm/versions/node/v20.18.1/bin/node`
 - `/absolute/path/to/index.js`: `/Users/johnny/projects/mcp-server-sqlite-npx/dist/index.js`
 - `/absolute/path/to/database.db`: `/Users/johnny/projects/database.db`
+
+## Use Released Version
+
+```json
+{
+  "mcpServers": {
+    "sqlite": {
+      "command": "/absolute/path/to/npx",
+      "args": [
+        "-y",
+        "mcp-server-sqlite-npx",
+        "/absolute/path/to/database.db"
+      ]
+    }
+  }
+}
+```
