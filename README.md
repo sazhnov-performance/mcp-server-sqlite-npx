@@ -30,7 +30,7 @@ Here's a full example when using nvm:
 ```json
 {
   "mcpServers": {
-    "sqlite-": {
+    "sqlite": {
       "command": "/Users/johnny/.nvm/versions/node/v22.12.0/bin/npx",
       "args": [
         "-y",
