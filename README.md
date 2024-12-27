@@ -15,7 +15,32 @@ Add the following to `claude_desktop_config.json`:
         "-y",
         "mcp-server-sqlite-npx",
         "/absolute/path/to/database.db"
-      ]
+      ],
+      "env": {
+        "PATH": "/absolute/path/to/executables",
+        "NODE_PATH": "/absolute/path/to/node_modules"
+      }
+    }
+  }
+}
+```
+
+Here's a full example when using nvm:
+
+```json
+{
+  "mcpServers": {
+    "sqlite-": {
+      "command": "/Users/johnny/.nvm/versions/node/v22.12.0/bin/npx",
+      "args": [
+        "-y",
+        "mcp-server-sqlite-npx",
+        "/Users/johnny/projects/database.db"
+      ],
+      "env": {
+        "PATH": "/Users/johnny/.nvm/versions/node/v22.12.0/bin:/usr/local/bin:/usr/bin:/bin",
+        "NODE_PATH": "/Users/johnny/.nvm/versions/node/v22.12.0/lib/node_modules"
+      }
     }
   }
 }
