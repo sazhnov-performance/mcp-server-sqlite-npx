@@ -40,12 +40,6 @@ const DescribeTableArgsSchema = z.object({
   table_name: z.string().describe('Name of the table to describe'),
 });
 
-const AppendInsightArgsSchema = z.object({
-  insight: z
-    .string()
-    .describe('Business insight discovered from data analysis'),
-});
-
 interface RunResult {
   affectedRows: number;
 }
@@ -89,7 +83,6 @@ class DatabaseWrapper {
 
 class SqliteDatabase {
   private readonly db: DatabaseWrapper;
-  private readonly insights: string[] = [];
 
   constructor(dbPath: string) {
     this.db = new DatabaseWrapper(dbPath);
@@ -100,31 +93,6 @@ class SqliteDatabase {
     params: any[] = [],
   ): Promise<T[]> {
     return this.db.query(sql, params);
-  }
-
-  synthesizeMemo(): string {
-    if (this.insights.length === 0) {
-      return 'No business insights have been discovered yet.';
-    }
-
-    const insights = this.insights
-      .map(insight => `- ${insight}`)
-      .join('\n');
-
-    let memo = '📊 Business Intelligence Memo 📊\n\n';
-    memo += 'Key Insights Discovered:\n\n';
-    memo += insights;
-
-    if (this.insights.length > 1) {
-      memo += '\n\nSummary:\n';
-      memo += `Analysis has revealed ${this.insights.length} key business insights that suggest opportunities for strategic optimization and growth.`;
-    }
-
-    return memo;
-  }
-
-  appendInsight(insight: string): void {
-    this.insights.push(insight);
   }
 
   async listTables(): Promise<any[]> {
@@ -220,13 +188,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           DescribeTableArgsSchema,
         ) as ToolInput,
       },
-      {
-        name: 'append_insight',
-        description: 'Add a business insight to the memo',
-        inputSchema: zodToJsonSchema(
-          AppendInsightArgsSchema,
-        ) as ToolInput,
-      },
     ],
   };
 });
@@ -302,19 +263,6 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
           content: [
             { type: 'text', text: JSON.stringify(schema, null, 2) },
           ],
-        };
-      }
-
-      case 'append_insight': {
-        const parsed = AppendInsightArgsSchema.safeParse(args);
-        if (!parsed.success) {
-          throw new Error(
-            `Invalid arguments for append_insight: ${parsed.error}`,
-          );
-        }
-        db.appendInsight(parsed.data.insight);
-        return {
-          content: [{ type: 'text', text: 'Insight added to memo' }],
         };
       }
 
