@@ -283,6 +283,8 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
 async function runServer() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  // Use console.error to show error output.
+  // console.log results in JSon exception.
   console.error('SQLite MCP Server running on stdio');
   console.error('Database path:', dbPath);
 }
