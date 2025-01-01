@@ -15,7 +15,7 @@ import path from 'path';
 // Command line argument parsing
 const args = process.argv.slice(2);
 if (args.length !== 1) {
-  console.error('Usage: mcp-server-sqlite <database-path>');
+  console.error('Usage: mcp-server-sqlite-npx <database-path>');
   process.exit(1);
 }
 
