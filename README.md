@@ -77,10 +77,9 @@ npm run build
 You can test the server using the [MCP Inspector tool](https://modelcontextprotocol.io/docs/tools/inspector):
 
 ```bash
-npx @modelcontextprotocol/inspector dist/index.js
+npx @modelcontextprotocol/inspector node dist/index.js /absolute/path/to/database.db
 ```
 
-Enter absolute path to database in `Arguments` in MCP Inspector.
 `Connect` and go to `Tools` to start using the server.
 
 ### Testing with Claude Desktop
