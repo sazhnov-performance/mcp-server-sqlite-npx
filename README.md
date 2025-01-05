@@ -92,7 +92,7 @@ Add the following to `claude_desktop_config.json`:
     "sqlite": {
       "command": "/absolute/path/to/node",
       "args": [
-        "/absolute/path/to/index.js",
+        "/absolute/path/to/dist/index.js",
         "/absolute/path/to/database.db"
       ]
     }
