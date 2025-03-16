@@ -37,21 +37,42 @@ Add the following to `claude_desktop_config.json`:
 }
 ```
 
-Here's a full example when using nvm:
+Full example when using nvm on macoS:
 
 ```json
 {
   "mcpServers": {
     "sqlite": {
-      "command": "/Users/johnny/.nvm/versions/node/v22.12.0/bin/npx",
+      "command": "/Users/{username}/.nvm/versions/node/v22.12.0/bin/npx",
       "args": [
         "-y",
         "mcp-server-sqlite-npx",
-        "/Users/johnny/projects/database.db"
+        "/Users/{username}/projects/database.db"
       ],
       "env": {
-        "PATH": "/Users/johnny/.nvm/versions/node/v22.12.0/bin:/usr/local/bin:/usr/bin:/bin",
-        "NODE_PATH": "/Users/johnny/.nvm/versions/node/v22.12.0/lib/node_modules"
+        "PATH": "/Users/{username}/.nvm/versions/node/v22.12.0/bin:/usr/local/bin:/usr/bin:/bin",
+        "NODE_PATH": "/Users/{username}/.nvm/versions/node/v22.12.0/lib/node_modules"
+      }
+    }
+  }
+}
+```
+
+Full example when using nvm on Windows:
+
+```json
+{
+  "mcpServers": {
+    "sqlite": {
+      "command": "C:\\Program Files\\nodejs\\npx.cmd",
+      "args": [
+        "-y",
+        "mcp-server-sqlite-npx",
+        "C:\\Users\\{username}\\projects\\database.db"
+      ],
+      "env": {
+        "PATH": "C:\\Program Files\\nodejs;%PATH%",
+        "NODE_PATH": "C:\\Program Files\\nodejs\\node_modules"
       }
     }
   }
@@ -102,9 +123,9 @@ Add the following to `claude_desktop_config.json`:
 
 Examples:
 
-- `/absolute/path/to/node`: `/Users/johnny/.nvm/versions/node/v20.18.1/bin/node`
-- `/absolute/path/to/index.js`: `/Users/johnny/projects/mcp-server-sqlite-npx/dist/index.js`
-- `/absolute/path/to/database.db`: `/Users/johnny/projects/database.db`
+- `/absolute/path/to/node`: `/Users/{username}/.nvm/versions/node/v20.18.1/bin/node`
+- `/absolute/path/to/index.js`: `/Users/{username}/projects/mcp-server-sqlite-npx/dist/index.js`
+- `/absolute/path/to/database.db`: `/Users/{username}/projects/database.db`
 
 ### Publish
 
