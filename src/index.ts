@@ -7,7 +7,7 @@ import {
   ListToolsRequestSchema,
   ToolSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import sqlite3 from 'sqlite3';
+import Database from 'better-sqlite3';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import path from 'path';
@@ -40,72 +40,40 @@ const DescribeTableArgsSchema = z.object({
   table_name: z.string().describe('Name of the table to describe'),
 });
 
-interface RunResult {
-  affectedRows: number;
-}
-
 /**
- * Wrapper for sqlite3.Database that bridges CommonJS and ESM modules.
- * This abstraction is necessary because:
- * 1. sqlite3 is a CommonJS module while we're using ESM (type: "module")
- * 2. The module interop requires careful handling of the Database import
- * 3. We need to promisify the callback-based API to work better with async/await
+ * SQLite database wrapper using better-sqlite3.
+ * better-sqlite3 provides a synchronous API that's easier to work with
+ * and doesn't require complex promise wrapping.
  */
-class DatabaseWrapper {
-  private readonly db: sqlite3.Database;
-
-  constructor(filename: string) {
-    this.db = new sqlite3.Database(filename);
-  }
-
-  query(sql: string, params: any[] = []): Promise<any[]> {
-    return new Promise((resolve, reject) => {
-      this.db.all(sql, params, (err: Error | null, rows: any[]) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
-  }
-
-  execute(sql: string, params: any[] = []): Promise<RunResult[]> {
-    return new Promise((resolve, reject) => {
-      this.db.run(
-        sql,
-        params,
-        function (this: sqlite3.RunResult, err: Error | null) {
-          if (err) reject(err);
-          else resolve([{ affectedRows: this.changes }]);
-        },
-      );
-    });
-  }
-}
-
 class SqliteDatabase {
-  private readonly db: DatabaseWrapper;
+  private readonly db: Database.Database;
 
   constructor(dbPath: string) {
-    this.db = new DatabaseWrapper(dbPath);
+    this.db = new Database(dbPath);
   }
 
-  private async query<T>(
-    sql: string,
-    params: any[] = [],
-  ): Promise<T[]> {
-    return this.db.query(sql, params);
+  private query<T>(sql: string, params: any[] = []): T[] {
+    const stmt = this.db.prepare(sql);
+    return stmt.all(params) as T[];
   }
 
-  async listTables(): Promise<any[]> {
+  private execute(sql: string, params: any[] = []): { changes: number } {
+    const stmt = this.db.prepare(sql);
+    const result = stmt.run(params);
+    return { changes: result.changes };
+  }
+
+  listTables(): any[] {
     return this.query(
       "SELECT name FROM sqlite_master WHERE type='table'",
     );
   }
 
-  async describeTable(tableName: string): Promise<any[]> {
+  describeTable(tableName: string): any[] {
     return this.query(`PRAGMA table_info(${tableName})`);
   }
 
-  async executeReadQuery(query: string): Promise<any[]> {
+  executeReadQuery(query: string): any[] {
     if (!query.trim().toUpperCase().startsWith('SELECT')) {
       throw new Error(
         'Only SELECT queries are allowed for read_query',
@@ -114,20 +82,20 @@ class SqliteDatabase {
     return this.query(query);
   }
 
-  async executeWriteQuery(query: string): Promise<any[]> {
+  executeWriteQuery(query: string): { changes: number } {
     if (query.trim().toUpperCase().startsWith('SELECT')) {
       throw new Error(
         'SELECT queries are not allowed for write_query',
       );
     }
-    return this.query(query);
+    return this.execute(query);
   }
 
-  async createTable(query: string): Promise<any[]> {
+  createTable(query: string): { changes: number } {
     if (!query.trim().toUpperCase().startsWith('CREATE TABLE')) {
       throw new Error('Only CREATE TABLE statements are allowed');
     }
-    return this.query(query);
+    return this.execute(query);
   }
 }
 
@@ -204,7 +172,7 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
             `Invalid arguments for read_query: ${parsed.error}`,
           );
         }
-        const results = await db.executeReadQuery(parsed.data.query);
+        const results = db.executeReadQuery(parsed.data.query);
         return {
           content: [
             { type: 'text', text: JSON.stringify(results, null, 2) },
@@ -219,7 +187,7 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
             `Invalid arguments for write_query: ${parsed.error}`,
           );
         }
-        const results = await db.executeWriteQuery(parsed.data.query);
+        const results = db.executeWriteQuery(parsed.data.query);
         return {
           content: [
             { type: 'text', text: JSON.stringify(results, null, 2) },
@@ -234,7 +202,7 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
             `Invalid arguments for create_table: ${parsed.error}`,
           );
         }
-        await db.createTable(parsed.data.query);
+        db.createTable(parsed.data.query);
         return {
           content: [
             { type: 'text', text: 'Table created successfully' },
@@ -243,7 +211,7 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
       }
 
       case 'list_tables': {
-        const tables = await db.listTables();
+        const tables = db.listTables();
         return {
           content: [
             { type: 'text', text: JSON.stringify(tables, null, 2) },
@@ -258,7 +226,7 @@ server.setRequestHandler(CallToolRequestSchema, async request => {
             `Invalid arguments for describe_table: ${parsed.error}`,
           );
         }
-        const schema = await db.describeTable(parsed.data.table_name);
+        const schema = db.describeTable(parsed.data.table_name);
         return {
           content: [
             { type: 'text', text: JSON.stringify(schema, null, 2) },

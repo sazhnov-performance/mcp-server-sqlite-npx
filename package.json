@@ -17,12 +17,13 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22.10.2",
     "typescript": "^5.7.2"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
-    "sqlite3": "^5.1.7",
+    "better-sqlite3": "^11.6.0",
     "zod-to-json-schema": "^3.24.1"
   }
 }
