@@ -4,6 +4,8 @@
 
 A Node.js implementation of the Model Context Protocol SQLite server, based on the [official Python reference](https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite). This version provides an npx-based alternative for environments where Python's UVX runner is not available, such as [LibreChat](https://github.com/danny-avila/LibreChat/issues/4876#issuecomment-2561363955).
 
+**Windows Compatible**: This fork uses `better-sqlite3` instead of `sqlite3` to avoid Visual Studio build requirements, making it fully compatible with Windows environments without additional setup.
+
 ## Use with Claude Desktop
 
 ### Installing via Smithery
@@ -27,17 +29,13 @@ Add the following to `claude_desktop_config.json`:
         "-y",
         "mcp-server-sqlite-npx",
         "/absolute/path/to/database.db"
-      ],
-      "env": {
-        "PATH": "/absolute/path/to/executables",
-        "NODE_PATH": "/absolute/path/to/node_modules"
-      }
+      ]
     }
   }
 }
 ```
 
-Full example when using nvm on macoS:
+Full example when using nvm on macOS:
 
 ```json
 {
@@ -48,11 +46,7 @@ Full example when using nvm on macoS:
         "-y",
         "mcp-server-sqlite-npx",
         "/Users/{username}/projects/database.db"
-      ],
-      "env": {
-        "PATH": "/Users/{username}/.nvm/versions/node/v22.12.0/bin:/usr/local/bin:/usr/bin:/bin",
-        "NODE_PATH": "/Users/{username}/.nvm/versions/node/v22.12.0/lib/node_modules"
-      }
+      ]
     }
   }
 }
@@ -69,11 +63,7 @@ Full example when using nvm on Windows:
         "-y",
         "mcp-server-sqlite-npx",
         "C:\\Users\\{username}\\projects\\database.db"
-      ],
-      "env": {
-        "PATH": "C:\\Program Files\\nodejs;%PATH%",
-        "NODE_PATH": "C:\\Program Files\\nodejs\\node_modules"
-      }
+      ]
     }
   }
 }
